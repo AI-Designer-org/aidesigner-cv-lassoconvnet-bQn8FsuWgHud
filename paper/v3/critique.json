@@ -1,0 +1,49 @@
+{
+  "verdict": "needs_revision",
+  "iteration": 3,
+  "summary": "The draft is substantially improved in scope discipline and now transparently states its pre-experimental status, but a few artifact-grounding and LaTeX reliability issues remain. The main remaining problems are a mismatched reproduction command and unsupported implementation/release claims that should be narrowed to match the repository artifacts.",
+  "issues": [
+    {
+      "id": "i_01",
+      "severity": "major",
+      "category": "research_eval",
+      "location": "Appendix, Section 'Reproducing Validation Results', lines 837--840",
+      "problem": "The paper tells readers to run `python model_profile.py --mode forward --steps 10`, but `claim_grounding.md` and `experiment_coverage.md` both reference `profile.py`, and the validator artifacts describe profiling evidence under that name. The paper's reproducibility instructions therefore do not align cleanly with the research-eval grounding artifacts.",
+      "suggested_fix": "Make the paper's profiling command and prose match the artifact-grounding documents exactly, either by updating the paper to the canonical validated command/file name used in research_eval or by reconciling the research_eval documents if `model_profile.py` is the intended canonical script.",
+      "persisted_from_previous": false
+    },
+    {
+      "id": "i_02",
+      "severity": "major",
+      "category": "claims",
+      "location": "Introduction contributions list, lines 127--128; NeurIPS Checklist item 5, lines 880--882",
+      "problem": "The paper claims the implementation is released 'under an open-source license,' but the provided artifacts visible here do not include a license file or other concrete evidence establishing the license terms. This turns a release-status statement into an unsupported factual claim.",
+      "suggested_fix": "Either add and cite the actual license artifact in the repository, or weaken the text to say the codebase is provided/released with the artifacts without asserting a specific open-source license.",
+      "persisted_from_previous": false
+    },
+    {
+      "id": "i_03",
+      "severity": "major",
+      "category": "latex",
+      "location": "Results tables, lines 468--480",
+      "problem": "Table entries use `\\checkmark`, but the preamble does not load a package that defines this command. As written, the manuscript may fail to compile on a standard LaTeX setup.",
+      "suggested_fix": "Either load a package that defines `\\checkmark` (for example `amssymb` alternatives do not define it reliably; use `pifont` or replace with plain text such as 'Pass').",
+      "persisted_from_previous": false
+    }
+  ],
+  "scope_check": {
+    "overstates_empirical_results": false,
+    "claims_sota_without_numbers": false,
+    "relabels_synthetic_as_real": false,
+    "demands_trained_model_results": false,
+    "ignores_research_eval_gaps": false,
+    "states_unverified_claim_as_fact": false,
+    "claims_baseline_superiority_without_coverage": false
+  },
+  "stats": {
+    "blockers": 0,
+    "majors": 3,
+    "minors": 0,
+    "nits": 0
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "verdict": "needs_revision",
+  "iteration": 1,
+  "summary": "The required PAPER.tex draft is missing from the review directory, so the paper cannot be evaluated for framing, factual grounding, scope compliance, or LaTeX quality. Provide a readable PAPER.tex and rerun the critique.",
+  "issues": [
+    {
+      "id": "i_01",
+      "severity": "blocker",
+      "category": "structure",
+      "location": "/artifacts/j_bQn8FsuWgHud/work/paper/v1/PAPER.tex",
+      "problem": "The required paper draft file PAPER.tex is missing or unreadable in the current iteration directory, so no end-to-end review can be performed.",
+      "suggested_fix": "Create or restore /artifacts/j_bQn8FsuWgHud/work/paper/v1/PAPER.tex with the full draft content and rerun the critique pass.",
+      "persisted_from_previous": false
+    }
+  ],
+  "scope_check": {
+    "overstates_empirical_results": false,
+    "claims_sota_without_numbers": false,
+    "relabels_synthetic_as_real": false,
+    "demands_trained_model_results": false,
+    "ignores_research_eval_gaps": false,
+    "states_unverified_claim_as_fact": false,
+    "claims_baseline_superiority_without_coverage": false
+  },
+  "stats": {
+    "blockers": 1,
+    "majors": 0,
+    "minors": 0,
+    "nits": 0
+  }
+}

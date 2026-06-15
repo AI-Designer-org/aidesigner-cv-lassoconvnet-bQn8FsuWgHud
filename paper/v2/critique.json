@@ -1,0 +1,22 @@
+{
+  "verdict": "needs_revision",
+  "summary": "Critic output was not valid JSON; treating as unresolved.",
+  "issues": [
+    {
+      "id": "i_parse",
+      "severity": "blocker",
+      "category": "structure",
+      "location": "\u2014",
+      "problem": "Critique JSON failed to parse.",
+      "suggested_fix": "Critic must emit valid JSON per ml-paper-critique schema.",
+      "persisted_from_previous": false
+    }
+  ],
+  "scope_check": {},
+  "stats": {
+    "blockers": 1,
+    "majors": 0,
+    "minors": 0,
+    "nits": 0
+  }
+}
