@@ -1,0 +1,219 @@
+{
+  "task_level": "level_1",
+  "domain": "CV",
+  "upstream_contract_present": false,
+  "contract_traceability": [
+    "research/.done: only clarification questions produced, no upstream research contract available",
+    "architect/architecture_design.md: comprehensive design doc with traceability table (Step 5) linking research claims to architecture decisions",
+    "coder/: full implementation of all three lasso modes"
+  ],
+  "baseline_status": [
+    {
+      "baseline": "loss_only mode (standard CNN + L1 loss penalty)",
+      "status": "implemented",
+      "comparison_available": false,
+      "reason": "loss_only config exists and is tested, but no training experiment compares proximal vs loss_only accuracy"
+    },
+    {
+      "baseline": "ResNet-18 with L2-only decay",
+      "status": "not_implemented",
+      "comparison_available": false,
+      "reason": "External baseline not included in repository"
+    }
+  ],
+  "claim_status_summary": {
+    "grounded": [
+      "L1 weight decay produces sparser weight matrices (well-known property of L1 regularization)",
+      "Group-lasso on filters induces structured sparsity (well-known in pruning literature)",
+      "Soft-thresholding with θ=0 reduces to identity"
+    ],
+    "hypothesis": [
+      "Architectural soft-thresholding produces sparser feature maps than loss-only L1 at equal accuracy",
+      "Per-channel learnable thresholds improve the accuracy-sparsity tradeoff vs. a fixed global threshold",
+      "Adaptive soft-threshold prevents gradient starvation",
+      "LISTA unrolling provides theoretical convergence guarantees for the forward pass"
+    ],
+    "TODO_unverified": [
+      "Proximal mode outperforms loss-only mode on accuracy-sparsity Pareto frontier",
+      "Group-lasso achieves >30% filter sparsity without >1% accuracy drop",
+      "Adaptive threshold successfully prevents neuron death during training",
+      "Tied-weights LISTA matches untied-weights accuracy at fewer parameters"
+    ]
+  },
+  "scores": {
+    "novelty": {
+      "score": 2,
+      "evidence": [
+        "architect/architecture_design.md Step 3: clearly articulates replacing ReLU with soft-thresholding as architectural lasso integration",
+        "coder/layers.py: implements SoftThreshold, AdaptiveSoftThreshold, HardThreshold as nn.Module classes",
+        "coder/blocks.py LassoProxConvBlock: soft-thresholding integrated into forward pass, not just loss function"
+      ],
+      "concerns": [
+        "No literature survey or related-work analysis (research stage incomplete)",
+        "Adaptive soft-threshold is well-known (Gregor & LeCun 2010) — incremental contribution",
+        "No experimental evidence that the approach differs meaningfully from vanilla L1 regularization on loss"
+      ]
+    },
+    "experimental_comprehensiveness": {
+      "score": 2,
+      "evidence": [
+        "validator/test_model.py: 30+ pytest tests covering shapes, gradients, numerics, sparsity, loss, checkpointing",
+        "validator/ablate.py: all 6 architect-proposed ablations (A1-A6) implemented as single-field config changes",
+        "validator/profile.py: torch.profiler script for forward, train, and memory profiling",
+        "test_model.py: CV domain tests (translation robustness, noise entropy, sparsity profile)"
+      ],
+      "concerns": [
+        "BLOCKING: No training loop implemented — cannot measure accuracy or validate the core claim",
+        "BLOCKING: No baseline comparison (external: ResNet-18; internal: proximal vs loss_only)",
+        "No experiment tracking, no seed control, no hyperparameter search",
+        "No data pipeline (CIFAR-10 loading, augmentation)"
+      ]
+    },
+    "theoretical_foundation": {
+      "score": 3,
+      "evidence": [
+        "architect/architecture_design.md Step 3 (gradient flow analysis) and Step 8 (loss formulation)",
+        "coder/loss.py: composite loss function well-documented with three penalty terms",
+        "coder/blocks.py ListaEncoder: rigorous connection to ISTA optimization documented",
+        "architect/architecture_design.md Step 7: four implementation risks identified with mitigations"
+      ],
+      "concerns": [
+        "No stationary-point analysis of the proximal-mode training objective (non-smooth due to soft-threshold)",
+        "Adaptive soft-threshold is not the proximal operator of any convex regularizer — docs acknowledge this but do not analyze the gap",
+        "No convergence rate analysis for LISTA unrolling (standard rate O(1/k) for ISTA; does unrolling preserve this?)"
+      ]
+    },
+    "result_analysis": {
+      "score": 1,
+      "evidence": [
+        "coder/smoke_test.py: basic shape + gradient verification at initialization",
+        "validator/ablate.py dry-run mode: measures parameter count and sparsity at init for all ablations"
+      ],
+      "concerns": [
+        "CRITICAL: No training results exist for any experiment",
+        "All measurements are at initialization (random weights) — not informative for validation",
+        "No accuracy, no loss curves, no sparsity-vs-accuracy tradeoff measurements",
+        "No error analysis or failure mode characterization"
+      ]
+    },
+    "implementation_reproducibility": {
+      "score": 4,
+      "evidence": [
+        "coder/: Complete, well-documented implementation with clear module boundaries",
+        "config.py: single dataclass for all hyperparameters with sensible defaults",
+        "test_model.py: comprehensive pytest suite (30+ tests)",
+        "layers.py: bf16/fp16 safety in all proximal operators",
+        "blocks.py LassoProxConvBlock: gradient checkpointing support"
+      ],
+      "concerns": [
+        "No setup.py or requirements.txt (depends on sys.path.insert for imports)",
+        "No training script — model can be instantiated and profiled but not trained end-to-end",
+        "Smoke test imports via sys.path.insert — fragile for external users"
+      ]
+    },
+    "writing_readiness": {
+      "score": 1,
+      "evidence": [
+        "architect/architecture_design.md: high-quality write-up with diagrams, traceability, and risk analysis",
+        "All code has extensive docstrings with mathematical notation"
+      ],
+      "concerns": [
+        "No experimental results to report in any publication",
+        "No related-work section (upstream research stage incomplete)",
+        "No ablation results table (no training experiments)",
+        "No figures, no tables of numerical results"
+      ]
+    }
+  },
+  "blocking_gaps": [
+    {
+      "code": "benchmark_not_executable",
+      "description": "No training loop exists — the core claim (proximal vs loss_only accuracy-sparsity tradeoff) cannot be evaluated",
+      "severity": "critical",
+      "files": []
+    },
+    {
+      "code": "baseline_not_beaten",
+      "description": "No baseline comparison implemented internally (loss_only) or externally (ResNet-18)",
+      "severity": "critical",
+      "files": []
+    },
+    {
+      "code": "claim_not_grounded",
+      "description": "6 claims marked as 'hypothesis' or 'TODO_unverified' require experimental results to be grounded",
+      "severity": "high",
+      "files": [
+        "architect/architecture_design.md (Step 5 traceability table)"
+      ]
+    },
+    {
+      "code": "coverage_gap",
+      "description": "No training data pipeline, no experiment tracking, no hyperparameter tuning",
+      "severity": "high",
+      "files": []
+    },
+    {
+      "code": "ablation_missing",
+      "description": "A5 (LISTA tied vs untied) can only be run in dry-run mode; no accuracy comparison available",
+      "severity": "medium",
+      "files": [
+        "validator/ablate.py"
+      ]
+    },
+    {
+      "code": "novelty_unverified",
+      "description": "No literature survey comparing against L1-regularized CNNs, pruning methods, or LISTA variants",
+      "severity": "medium",
+      "files": [
+        "research/.done"
+      ]
+    }
+  ],
+  "recommended_next_experiments": [
+    {
+      "priority": 1,
+      "experiment": "Train proximal vs loss_only mode on CIFAR-10",
+      "description": "Train both modes with identical architecture (stage_channels=(64,128,256,512), stage_depths=(2,2,2,2)) for 200 epochs. Report test accuracy and activation sparsity at convergence.",
+      "expected_outcome": "Proximal mode should match loss-only accuracy within 1% while achieving >20% activation sparsity",
+      "falsification": "If accuracy drops >3% or sparsity <5%, the architectural integration provides no benefit over loss-only L1"
+    },
+    {
+      "priority": 2,
+      "experiment": "Run all 6 ablations (A1-A6) on CIFAR-10",
+      "description": "Train each ablation config for 100 epochs, measure accuracy and sparsity. Rank by accuracy-sparsity Pareto efficiency.",
+      "expected_outcome": "A1 (loss_only) lowest sparsity; A4 (adaptive) most stable training; A3 (no group lasso) highest accuracy",
+      "falsification": "If A1 matches A0 on sparsity, architectural prox is unnecessary"
+    },
+    {
+      "priority": 3,
+      "experiment": "Compare against standard ResNet-18",
+      "description": "Train ResNet-18 with standard L2 decay. Compare accuracy, parameter count, and inference speed against LassoConvNet.",
+      "expected_outcome": "LassoConvNet should match ResNet-18 accuracy with sparser activations",
+      "falsification": "If ResNet-18 achieves higher accuracy at same parameter count, the architecture underperforms standard designs"
+    },
+    {
+      "priority": 4,
+      "experiment": "Threshold evolution analysis",
+      "description": "Track per-channel theta values during training. Measure: (a) do thresholds converge? (b) is there channel specialization? (c) does theta oscillate in late training?",
+      "expected_outcome": "Thresholds should converge to distinct per-channel values, with higher thresholds on less informative channels"
+    },
+    {
+      "priority": 5,
+      "experiment": "Gradient starvation test",
+      "description": "Compare soft vs adaptive threshold during training. Measure: dead neuron fraction, gradient norm, and final accuracy.",
+      "expected_outcome": "Adaptive threshold should have fewer dead channels (near-zero gradient from dead zone)"
+    },
+    {
+      "priority": 6,
+      "experiment": "Post-training pruning + export",
+      "description": "Remove zero-filters (from group lasso), export without threshold ops (set θ→0). Measure compressed model accuracy and inference speedup.",
+      "expected_outcome": "10-30% parameter reduction with <1% accuracy drop"
+    },
+    {
+      "priority": 7,
+      "experiment": "LISTA convergence analysis",
+      "description": "Compare tied vs untied LISTA on CIFAR-10. Measure: accuracy vs number of iterations, reconstruction error (MSE of D*Z vs X).",
+      "expected_outcome": "Tied weights should match untied at 50-70% of the parameters"
+    }
+  ]
+}
